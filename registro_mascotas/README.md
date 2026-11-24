@@ -25,6 +25,124 @@
     
 2. **Ejecutar `App.java`**
 
+## Pruebas unitarias de la Entrega 2
+
+Las tres funcionalidades se prueban con JUnit 5 y Mockito mediante nueve métodos
+automatizados. Cada clase contiene un caso normal, uno límite y uno de error:
+
+| Clase en `src/test/java/arqui/registro_mascotas/Servicio` | Requisitos | Normal | Límite | Error |
+| --- | --- | --- | --- | --- |
+| `ServicioMascotaRegistroTest` | RF-01, RF-06 | Registro válido con propietario existente | Edad cero | Edad negativa |
+| `ServicioMascotaActualizacionTest` | RF-03, RF-06 | Actualización válida que conserva el ID | Edad cero | Mascota inexistente |
+| `ServicioMascotaEliminacionTest` | RF-04 | Eliminación válida que conserva al propietario | Último registro existente | Registro inexistente |
+
+`@Mock` sustituye los repositorios y `@InjectMocks` construye el servicio real con
+ellos. `when(...).thenReturn(...)` define las respuestas del repositorio para cada
+escenario. Las aserciones comprueban los resultados o excepciones y `verify`
+comprueba que se guarda o elimina únicamente cuando corresponde. No se inicia
+Spring Boot ni se necesitan MySQL, XAMPP, H2 o datos guardados previamente.
+
+Cada método recibe entidades y mocks nuevos, sin depender de otra prueba ni de
+su orden. El caso del último registro utiliza un mapa local con una sola mascota
+como estado del repositorio simulado: tras ejecutar el servicio, comprueba que
+se solicitó el borrado y el mapa quedó vacío. No ejecuta consultas reales ni
+presupone que el servicio consulte `count()`.
+
+Estas pruebas comprueban la lógica del servicio con persistencia simulada. El
+borrado real de filas, las claves foráneas y las cascadas JPA corresponden a las
+pruebas de integración con una base de datos.
+
+### Ejecución durante la revisión
+
+Abre la carpeta que contiene `pom.xml` y usa los comandos de tu consola. CMD
+muestra un indicador como `C:\Users\astri>`; PowerShell suele mostrar `PS C:\...>`.
+
+Desde **Símbolo del sistema (CMD)**:
+
+```bat
+cd /d "C:\Users\astri\Downloads\registro_mascotas (2)\registro_mascotas"
+set "JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-21.0.5.11-hotspot"
+set "PATH=%JAVA_HOME%\bin;%PATH%"
+
+mvnw.cmd -version
+mvnw.cmd clean test
+```
+
+Desde **PowerShell**:
+
+```powershell
+cd "C:\Users\astri\Downloads\registro_mascotas (2)\registro_mascotas"
+
+# Selecciona Java 21 en esta terminal. Ajusta la ruta en otro equipo.
+$env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-21.0.5.11-hotspot"
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+
+.\mvnw.cmd -version
+.\mvnw.cmd clean test
+```
+
+El comando `mvnw.cmd -version` debe mostrar **Java version: 21.0.5** en este equipo.
+Las asignaciones de Java afectan solo a la ventana actual; repítelas en una
+ventana nueva. Los comandos `$env:...` son exclusivos de PowerShell y no sirven
+en CMD. En otro equipo, ajusta la ruta al JDK 21 instalado.
+
+El comando `clean test` recompila el proyecto y ejecuta las nueve pruebas. El
+resultado esperado es:
+
+```text
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+```
+
+No necesitas ejecutar `App.java`, iniciar MySQL, modificar `application.properties`
+ni editar el servicio o las pruebas para esta ejecución. Los casos de error pasan
+cuando el servicio lanza la excepción esperada y no guarda o elimina datos; no
+aparecen como fallos de la suite. Los informes quedan en `target/surefire-reports`.
+
+En otro equipo, prepara JDK 21 y ejecuta el comando antes de la revisión, con
+internet disponible la primera vez para descargar Maven y las dependencias.
+Después de esa preparación, puedes comprobar la ejecución sin red y variando
+el orden de las clases:
+
+```powershell
+.\mvnw.cmd -o "-Dsurefire.runOrder=random" test
+```
+
+Para mostrar una funcionalidad por separado:
+
+```powershell
+.\mvnw.cmd "-Dtest=ServicioMascotaRegistroTest" test
+.\mvnw.cmd "-Dtest=ServicioMascotaActualizacionTest" test
+.\mvnw.cmd "-Dtest=ServicioMascotaEliminacionTest" test
+```
+
+### Prueba de integración existente
+
+La prueba original `contextLoads` se conserva como
+`RegistroMascotasApplicationIT`. Arranca el contexto completo de Spring y requiere
+MySQL disponible y configurado. El sufijo `IT` la separa de las pruebas unitarias
+que Maven Surefire descubre por defecto; no está deshabilitada. Para ejecutarla
+explícitamente con su base de datos preparada:
+
+```powershell
+.\mvnw.cmd "-Dtest=RegistroMascotasApplicationIT" test
+```
+
+### Reglas y consideraciones del PDF de la Entrega 2
+
+Las pruebas deben cubrir la lógica principal, incluir casos normales, límite y de
+error cuando apliquen, tener nombres descriptivos, ser independientes y ejecutarse
+durante la revisión sin ajustes del código fuente para hacerlas pasar. La entrega
+se organiza aquí en tres clases con tres métodos cada una, según los casos
+seleccionados para registro, actualización y eliminación.
+
+El documento también pide commits pequeños y descriptivos para las pruebas,
+trazabilidad con los requisitos y un UML coherente con el código. Solicita el
+diagrama PDF en `Docs/DiagramaClases_Equipo.pdf`. Para la revisión presencial,
+indica llevar el documento de instrucciones impreso y engrapado, con la rúbrica
+al frente, y que participen todos los integrantes. Las reglas de publicación se
+aplicarán cuando se autorice subir los cambios.
+
 ## Gestión de mascotas (RF-01 a RF-06)
 
 El registro y la edición incluyen los atributos del UML: especie, raza, sexo y
