@@ -34,7 +34,18 @@ nuevos se añaden mediante `ddl-auto=update`: los textos anteriores quedan vací
 y el peso usa un valor predeterminado de `0`, sin reemplazar los datos existentes.
 
 Después de registrar una mascota, el listado muestra un mensaje con su nombre e
-identificador. También muestra el resultado de una actualización.
+identificador. También muestra el resultado de una actualización o eliminación.
+
+Para eliminar una mascota, el enlace «Eliminar» abre una pantalla de confirmación.
+«Cancelar» vuelve al listado sin cambios; «Confirmar eliminación» envía la
+operación por POST. Abrir `/mascotas/eliminar/{id}` por GET no borra registros.
+La eliminación conserva al propietario y se rechaza si una clave foránea impide
+borrar la mascota, mostrando el motivo. La eliminación múltiple mantiene su
+confirmación y se realiza en una transacción.
+
+Este alcance cubre el módulo actual de mascotas y su relación con propietarios.
+Las reglas específicas de citas, atenciones y vacunas se incorporarán junto con
+esos módulos.
 
 ## Propietarios de las mascotas
 

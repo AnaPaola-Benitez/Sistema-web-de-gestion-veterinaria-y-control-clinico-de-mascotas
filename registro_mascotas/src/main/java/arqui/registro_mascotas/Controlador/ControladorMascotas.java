@@ -95,17 +95,37 @@ public class ControladorMascotas {
         return "redirect:/mascotas";
     }
 
-    // Eliminar una mascota
+    // Consultar por GET solo muestra la confirmación; no elimina registros.
     @GetMapping("/eliminar/{id}")
-    public String eliminarMascota(@PathVariable("id") int id) {
+    public String mostrarConfirmacionDeEliminarMascota(@PathVariable("id") int id, Model modelo) {
+        modelo.addAttribute("mascota", servicio.buscar(id));
+        return "mascotas/confirmar_eliminacion";
+    }
+
+    @PostMapping("/eliminar/{id}")
+    public String eliminarMascota(@PathVariable("id") int id,
+            @RequestParam(value = "confirmado", defaultValue = "false") boolean confirmado,
+            RedirectAttributes redirectAttributes) {
+        if (!confirmado) {
+            redirectAttributes.addFlashAttribute("mensajeAviso", "La eliminación fue cancelada.");
+            return "redirect:/mascotas";
+        }
         servicio.eliminar(id);
+        redirectAttributes.addFlashAttribute("mensajeExito",
+                "La mascota con ID " + id + " se eliminó correctamente.");
         return "redirect:/mascotas";
     }
     
     // Eliminar multiples mascotas
     @PostMapping("/eliminar-multiples")
-    public String eliminarMultiples(@RequestParam(value = "mascotasIds", required = false) List<Integer> mascotasIds) {
+    public String eliminarMultiples(@RequestParam(value = "mascotasIds", required = false) List<Integer> mascotasIds,
+            RedirectAttributes redirectAttributes) {
         servicio.eliminarMultiples(mascotasIds);
+        if (mascotasIds == null || mascotasIds.isEmpty()) {
+            redirectAttributes.addFlashAttribute("mensajeAviso", "No se seleccionaron mascotas para eliminar.");
+        } else {
+            redirectAttributes.addFlashAttribute("mensajeExito", "Se eliminaron las mascotas seleccionadas correctamente.");
+        }
         return "redirect:/mascotas";
     }
 }

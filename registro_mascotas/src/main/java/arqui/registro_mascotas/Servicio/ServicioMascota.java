@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import arqui.registro_mascotas.BD.RepositorioMascotas;
 import arqui.registro_mascotas.BD.RepositorioPropietario;
@@ -105,11 +106,18 @@ public class ServicioMascota {
      *
      * @param id identificador de la mascota
      * @throws IllegalArgumentException si la mascota no existe
+     * @throws IllegalStateException si hay registros relacionados que impiden eliminarla
      */
     @Transactional
     public void eliminar(int id) {
         buscar(id);
-        repositorio.deleteById(id);
+        try {
+            repositorio.deleteById(id);
+            repositorio.flush();
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException(
+                    "No se puede eliminar la mascota porque tiene registros relacionados.", ex);
+        }
     }
 
     /**
@@ -118,6 +126,7 @@ public class ServicioMascota {
      *
      * @param ids identificadores seleccionados
      * @throws IllegalArgumentException si hay un ID nulo o una mascota inexistente
+     * @throws IllegalStateException si hay registros relacionados que impiden la eliminación
      */
     @Transactional
     public void eliminarMultiples(List<Integer> ids) {
@@ -130,7 +139,13 @@ public class ServicioMascota {
             }
             buscar(id);
         }
-        repositorio.deleteAllById(ids);
+        try {
+            repositorio.deleteAllById(ids);
+            repositorio.flush();
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException(
+                    "No se pueden eliminar las mascotas seleccionadas porque tienen registros relacionados.", ex);
+        }
     }
 
     /**
