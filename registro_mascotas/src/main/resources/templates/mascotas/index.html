@@ -8,6 +8,8 @@
     </head>
     <body class="bg-gray-100">
         <div class="container mx-auto my-8">
+            <p th:if="${mensajeExito}" th:text="${mensajeExito}" role="status"
+               class="mb-4 p-4 bg-green-100 text-green-800 rounded-md"></p>
             <!-- Formulario para poder eliminar múltiples mascotas al mismo tiempo -->
             <form th:action="@{/mascotas/eliminar-multiples}" method="post" 
             onsubmit="return confirm('¿Estás seguro de eliminar las mascotas seleccionadas?');">
@@ -25,6 +27,7 @@
                 </div>
                 
                 <!-- Tabla con la información de la base de datos -->
+                <div class="overflow-x-auto">
                 <table class="table-auto w-full bg-white rounded-lg shadow-md overflow-hidden">
                     <thead>
                         <tr class="bg-gray-200 text-gray-700">
@@ -33,6 +36,10 @@
                             <th class="p-4 text-left">Imagen</th>
                             <th class="p-4 text-left">Nombre</th>
                             <th class="p-4 text-left">Edad</th>
+                            <th class="p-4 text-left">Especie</th>
+                            <th class="p-4 text-left">Raza</th>
+                            <th class="p-4 text-left">Sexo</th>
+                            <th class="p-4 text-left">Peso (kg)</th>
                             <th class="p-4 text-left">Propietario</th>
                             <th class="p-4 text-left">Acciones</th>
                         </tr>
@@ -48,6 +55,10 @@
                             </td>
                             <td class="p-4" th:text="${mascota.nombre}">Nombre</td>
                             <td class="p-4" th:text="${mascota.edad}">Edad</td>
+                            <td class="p-4" th:text="${#strings.isEmpty(mascota.especie) ? 'Sin registrar' : mascota.especie}">Especie</td>
+                            <td class="p-4" th:text="${#strings.isEmpty(mascota.raza) ? 'Sin registrar' : mascota.raza}">Raza</td>
+                            <td class="p-4" th:text="${#strings.isEmpty(mascota.sexo) ? 'Sin registrar' : mascota.sexo}">Sexo</td>
+                            <td class="p-4" th:text="${mascota.peso == 0 ? 'Sin registrar' : mascota.peso}">Peso</td>
                             <td class="p-4" th:text="${mascota.propietario == null ? 'Sin propietario asignado' : mascota.propietario.nombre + (mascota.propietario.apellido == null ? '' : ' ' + mascota.propietario.apellido)}">Propietario</td>
                             <td class="p-4">
                                 <a th:href="@{'/mascotas/editar/' + ${mascota.id}}" 
@@ -59,6 +70,7 @@
                         </tr>
                     </tbody>
                 </table>
+                </div>
 
             </form>
         </div>

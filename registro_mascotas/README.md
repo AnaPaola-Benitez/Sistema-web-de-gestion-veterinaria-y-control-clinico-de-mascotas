@@ -25,6 +25,17 @@
     
 2. **Ejecutar `App.java`**
 
+## Gestión de mascotas (RF-01 a RF-06)
+
+El registro y la edición incluyen los atributos del UML: especie, raza, sexo y
+peso en kilogramos. Son opcionales; el peso vacío se almacena como `0` y se muestra
+como «Sin registrar». Se rechazan pesos negativos o valores no finitos. Los campos
+nuevos se añaden mediante `ddl-auto=update`: los textos anteriores quedan vacíos
+y el peso usa un valor predeterminado de `0`, sin reemplazar los datos existentes.
+
+Después de registrar una mascota, el listado muestra un mensaje con su nombre e
+identificador. También muestra el resultado de una actualización.
+
 ## Propietarios de las mascotas
 
 Cada mascota debe estar vinculada a un propietario existente. Los formularios de

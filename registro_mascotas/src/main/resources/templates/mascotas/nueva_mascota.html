@@ -37,6 +37,31 @@
                     </p>
                 </div>
 
+                <fieldset class="space-y-4 border rounded-md p-4">
+                    <legend class="px-2 text-lg font-medium text-gray-700">Datos clínicos básicos (opcionales)</legend>
+                    <div>
+                        <label for="especie" class="block text-gray-700">Especie</label>
+                        <input type="text" id="especie" name="especie" maxlength="255"
+                               class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="raza" class="block text-gray-700">Raza</label>
+                        <input type="text" id="raza" name="raza" maxlength="255"
+                               class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="sexo" class="block text-gray-700">Sexo</label>
+                        <input type="text" id="sexo" name="sexo" maxlength="255"
+                               class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="peso" class="block text-gray-700">Peso (kg)</label>
+                        <input type="number" id="peso" name="peso" min="0" step="any" aria-describedby="ayudaPeso"
+                               class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        <p id="ayudaPeso" class="mt-1 text-sm text-gray-600">Deja el campo vacío si todavía no se conoce el peso.</p>
+                    </div>
+                </fieldset>
+
                 <!-- Campo para la URL de la imagen -->
                 <div>
                     <label for="urlImagen" class="block text-lg font-medium text-gray-700">URL de Imagen (opcional)</label>

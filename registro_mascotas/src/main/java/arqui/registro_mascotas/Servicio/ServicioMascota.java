@@ -80,7 +80,7 @@ public class ServicioMascota {
      * El identificador de los datos recibidos no modifica el registro elegido.
      *
      * @param id identificador del registro que se actualizará
-     * @param datos nuevos valores de nombre, edad, fotografía y propietario
+     * @param datos nuevos valores de nombre, edad, fotografía, propietario y datos clínicos
      * @return mascota actualizada
      * @throws IllegalArgumentException si los datos son inválidos, no existe el ID
      *         o el propietario no está registrado
@@ -93,6 +93,10 @@ public class ServicioMascota {
         mascota.setEdad(datos.getEdad());
         mascota.setUrlImagen(datos.getUrlImagen());
         mascota.setPropietario(propietario);
+        mascota.setEspecie(datos.getEspecie());
+        mascota.setRaza(datos.getRaza());
+        mascota.setSexo(datos.getSexo());
+        mascota.setPeso(datos.getPeso());
         return repositorio.save(mascota);
     }
 
@@ -133,6 +137,7 @@ public class ServicioMascota {
      * Valida los campos y la existencia del propietario (RF-01, RF-03 y RF-06).
      * El nombre es obligatorio, la edad admite cero y la fotografía es opcional.
      * Si se indica una fotografía, debe ser una URL HTTP o HTTPS con servidor.
+     * El peso se expresa en kg, debe ser finito y no negativo; cero indica que no se capturó.
      *
      * @param mascota datos que se validarán
      * @throws IllegalArgumentException si se incumple alguna regla o el propietario
@@ -161,6 +166,9 @@ public class ServicioMascota {
         }
         if (mascota.getEdad() < 0) {
             throw new IllegalArgumentException("La edad de la mascota no puede ser negativa.");
+        }
+        if (!Double.isFinite(mascota.getPeso()) || mascota.getPeso() < 0) {
+            throw new IllegalArgumentException("El peso de la mascota debe ser un número finito mayor o igual a cero.");
         }
         String urlImagen = mascota.getUrlImagen();
         if (urlImagen == null || urlImagen.isBlank()) {

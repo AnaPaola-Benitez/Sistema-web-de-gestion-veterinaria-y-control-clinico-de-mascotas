@@ -1,15 +1,19 @@
 package arqui.registro_mascotas.Controlador;
 
 import java.util.List;
+import java.beans.PropertyEditorSupport;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import arqui.registro_mascotas.Modelo.Mascota;
 import arqui.registro_mascotas.Servicio.ServicioMascota;
@@ -29,6 +33,17 @@ public class ControladorMascotas {
     public ControladorMascotas(ServicioMascota servicio, ServicioPropietario servicioPropietario) {
         this.servicio = servicio;
         this.servicioPropietario = servicioPropietario;
+    }
+
+    // El peso es opcional; una captura vacía mantiene el valor cero del modelo UML.
+    @InitBinder("mascota")
+    public void configurarFormulario(WebDataBinder binder) {
+        binder.registerCustomEditor(double.class, "peso", new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String texto) {
+                setValue(texto == null || texto.isBlank() ? 0.0 : Double.parseDouble(texto));
+            }
+        });
     }
 
     // Mostrar lista de mascotas
@@ -51,9 +66,11 @@ public class ControladorMascotas {
 
     // Guardar una nueva mascota
     @PostMapping("/guardar")
-    public String guardarMascota(@ModelAttribute("mascota") Mascota mascota)
+    public String guardarMascota(@ModelAttribute("mascota") Mascota mascota, RedirectAttributes redirectAttributes)
     {
-        servicio.registrar(mascota);
+        Mascota registrada = servicio.registrar(mascota);
+        redirectAttributes.addFlashAttribute("mensajeExito",
+                "Se registró la mascota " + registrada.getNombre() + " con ID " + registrada.getId() + " correctamente.");
         return "redirect:/mascotas";
     }
 
@@ -68,9 +85,12 @@ public class ControladorMascotas {
 
     // Actualizar una mascota existente
     @PostMapping("/actualizar/{id}")
-    public String actualizarMascota(@PathVariable("id") int id, @ModelAttribute("mascota") Mascota mascota)
+    public String actualizarMascota(@PathVariable("id") int id, @ModelAttribute("mascota") Mascota mascota,
+            RedirectAttributes redirectAttributes)
     {
         servicio.actualizar(id, mascota);
+        redirectAttributes.addFlashAttribute("mensajeExito",
+                "La mascota con ID " + id + " se actualizó correctamente.");
 
         return "redirect:/mascotas";
     }
