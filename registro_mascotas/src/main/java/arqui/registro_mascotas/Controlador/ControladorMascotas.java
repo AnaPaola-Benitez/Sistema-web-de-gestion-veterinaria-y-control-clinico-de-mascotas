@@ -2,7 +2,6 @@ package arqui.registro_mascotas.Controlador;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,8 +11,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import arqui.registro_mascotas.BD.RepositorioMascotas;
 import arqui.registro_mascotas.Modelo.Mascota;
+import arqui.registro_mascotas.Servicio.ServicioMascota;
 
 /*
  * El controlador es la clase que se encarga de asignar peticiones http a los diferentes urls
@@ -23,14 +22,17 @@ import arqui.registro_mascotas.Modelo.Mascota;
 @Controller
 @RequestMapping("/mascotas")
 public class ControladorMascotas {
-    @Autowired
-    private RepositorioMascotas repo;
+    private final ServicioMascota servicio;
+
+    public ControladorMascotas(ServicioMascota servicio) {
+        this.servicio = servicio;
+    }
 
     // Mostrar lista de mascotas
     @GetMapping("")
     public String MostrarListaDeMascotas(Model modelo) 
     {
-        var mascotas = repo.findAll();
+        var mascotas = servicio.listar();
         modelo.addAttribute("mascotas", mascotas);
         return "mascotas/index";
     }
@@ -47,28 +49,29 @@ public class ControladorMascotas {
     @PostMapping("/guardar")
     public String guardarMascota(@ModelAttribute("mascota") Mascota mascota)
     {
-        repo.save(mascota);
+        servicio.registrar(mascota);
         return "redirect:/mascotas";
     }
 
     // Mostrar formulario para editar una mascota existente
     @GetMapping("/editar/{id}")
     public String mostrarFormularioDeEditarMascota(@PathVariable("id") int id, Model modelo) {
-        var mascota = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Id de mascota inexistente"));
+        var mascota = servicio.buscar(id);
         modelo.addAttribute("mascota", mascota);
         return "mascotas/editar_mascota";
     }
 
     // Actualizar una mascota existente
     @PostMapping("/actualizar/{id}")
-    public String actualizarMascota(@PathVariable("id") int id, @RequestParam String nombre, @RequestParam int edad, @RequestParam String urlImagen)
+    public String actualizarMascota(@PathVariable("id") int id, @RequestParam("nombre") String nombre,
+            @RequestParam("edad") int edad, @RequestParam(value = "urlImagen", required = false) String urlImagen)
     {
-        Mascota mascota = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Id de mascota inexistente"));
+        Mascota mascota = new Mascota();
         mascota.setNombre(nombre);
         mascota.setEdad(edad);
         mascota.setUrlImagen(urlImagen);
 
-        repo.save(mascota);
+        servicio.actualizar(id, mascota);
 
         return "redirect:/mascotas";
     }
@@ -76,17 +79,14 @@ public class ControladorMascotas {
     // Eliminar una mascota
     @GetMapping("/eliminar/{id}")
     public String eliminarMascota(@PathVariable("id") int id) {
-        repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Id de mascota inexistente"));
-        repo.deleteById(id);
+        servicio.eliminar(id);
         return "redirect:/mascotas";
     }
     
     // Eliminar multiples mascotas
     @PostMapping("/eliminar-multiples")
-    public String eliminarMultiples(@RequestParam("mascotasIds") List<Integer> mascotasIds) {
-        if (mascotasIds != null && !mascotasIds.isEmpty()) {
-            repo.deleteAllById(mascotasIds);
-        }
+    public String eliminarMultiples(@RequestParam(value = "mascotasIds", required = false) List<Integer> mascotasIds) {
+        servicio.eliminarMultiples(mascotasIds);
         return "redirect:/mascotas";
     }
 }
