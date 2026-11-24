@@ -1,7 +1,7 @@
 package arqui.registro_mascotas.Controlador;
 
-import java.util.List;
 import java.beans.PropertyEditorSupport;
+import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,9 +19,11 @@ import arqui.registro_mascotas.Modelo.Mascota;
 import arqui.registro_mascotas.Servicio.ServicioMascota;
 import arqui.registro_mascotas.Servicio.ServicioPropietario;
 
-/*
- * El controlador es la clase que se encarga de asignar peticiones http a los diferentes urls
- * ControladorMascotas implementa el crud para añadir mascotas a la base de datos
+/**
+ * Coordina las vistas y operaciones de mascotas de los RF-01 a RF-06.
+ * Expone las seis operaciones del UML y delega las reglas de negocio al servicio.
+ * Los métodos HTTP auxiliares conservan las rutas, los mensajes flash y la
+ * confirmación de eliminación de la aplicación.
  */
 
 @Controller
@@ -46,9 +48,14 @@ public class ControladorMascotas {
         });
     }
 
-    // Mostrar lista de mascotas
+    /**
+     * Lista las mascotas registradas (RF-02).
+     *
+     * @param modelo datos para la vista
+     * @return nombre de la vista del listado
+     */
     @GetMapping("")
-    public String MostrarListaDeMascotas(Model modelo) 
+    public String listar(Model modelo)
     {
         var mascotas = servicio.listar();
         modelo.addAttribute("mascotas", mascotas);
@@ -68,15 +75,33 @@ public class ControladorMascotas {
     @PostMapping("/guardar")
     public String guardarMascota(@ModelAttribute("mascota") Mascota mascota, RedirectAttributes redirectAttributes)
     {
-        Mascota registrada = servicio.registrar(mascota);
-        redirectAttributes.addFlashAttribute("mensajeExito",
+        return registrar(mascota, redirectAttributes);
+    }
+
+    /**
+     * Registra una mascota validada por el servicio (RF-01 y RF-06).
+     *
+     * @param datos datos de la mascota y su propietario
+     * @param modelo modelo que recibe la confirmación del registro
+     * @return redirección al listado
+     */
+    public String registrar(Mascota datos, Model modelo) {
+        Mascota registrada = servicio.registrar(datos);
+        agregarMensajeExito(modelo,
                 "Se registró la mascota " + registrada.getNombre() + " con ID " + registrada.getId() + " correctamente.");
         return "redirect:/mascotas";
     }
 
-    // Mostrar formulario para editar una mascota existente
+    /**
+     * Busca una mascota por ID y muestra sus datos en el formulario actual
+     * de consulta y edición (RF-02 y RF-03).
+     *
+     * @param id identificador de la mascota
+     * @param modelo datos para la vista y selección de propietario
+     * @return nombre de la vista de edición
+     */
     @GetMapping("/editar/{id}")
-    public String mostrarFormularioDeEditarMascota(@PathVariable("id") int id, Model modelo) {
+    public String buscar(@PathVariable("id") int id, Model modelo) {
         var mascota = servicio.buscar(id);
         modelo.addAttribute("mascota", mascota);
         modelo.addAttribute("propietarios", servicioPropietario.listar());
@@ -88,10 +113,21 @@ public class ControladorMascotas {
     public String actualizarMascota(@PathVariable("id") int id, @ModelAttribute("mascota") Mascota mascota,
             RedirectAttributes redirectAttributes)
     {
-        servicio.actualizar(id, mascota);
-        redirectAttributes.addFlashAttribute("mensajeExito",
-                "La mascota con ID " + id + " se actualizó correctamente.");
+        return actualizar(id, mascota, redirectAttributes);
+    }
 
+    /**
+     * Actualiza una mascota existente mediante el servicio (RF-03 y RF-06).
+     *
+     * @param id identificador de la mascota que se actualizará
+     * @param datos nuevos datos de la mascota
+     * @param modelo modelo que recibe la confirmación de la actualización
+     * @return redirección al listado
+     */
+    public String actualizar(int id, Mascota datos, Model modelo) {
+        servicio.actualizar(id, datos);
+        agregarMensajeExito(modelo,
+                "La mascota con ID " + id + " se actualizó correctamente.");
         return "redirect:/mascotas";
     }
 
@@ -110,22 +146,53 @@ public class ControladorMascotas {
             redirectAttributes.addFlashAttribute("mensajeAviso", "La eliminación fue cancelada.");
             return "redirect:/mascotas";
         }
-        servicio.eliminar(id);
+        String destino = eliminar(id);
         redirectAttributes.addFlashAttribute("mensajeExito",
                 "La mascota con ID " + id + " se eliminó correctamente.");
+        return destino;
+    }
+
+    /**
+     * Elimina una mascota mediante el servicio (RF-04). El flujo HTTP invoca
+     * esta operación después de comprobar la confirmación del usuario.
+     *
+     * @param id identificador de la mascota
+     * @return redirección al listado
+     */
+    public String eliminar(int id) {
+        servicio.eliminar(id);
         return "redirect:/mascotas";
     }
     
     // Eliminar multiples mascotas
     @PostMapping("/eliminar-multiples")
-    public String eliminarMultiples(@RequestParam(value = "mascotasIds", required = false) List<Integer> mascotasIds,
+    public String procesarEliminacionMultiple(@RequestParam(value = "mascotasIds", required = false) List<Integer> mascotasIds,
             RedirectAttributes redirectAttributes) {
-        servicio.eliminarMultiples(mascotasIds);
+        String destino = eliminarMultiples(mascotasIds);
         if (mascotasIds == null || mascotasIds.isEmpty()) {
             redirectAttributes.addFlashAttribute("mensajeAviso", "No se seleccionaron mascotas para eliminar.");
         } else {
             redirectAttributes.addFlashAttribute("mensajeExito", "Se eliminaron las mascotas seleccionadas correctamente.");
         }
+        return destino;
+    }
+
+    /**
+     * Elimina las mascotas seleccionadas mediante el servicio (RF-05).
+     *
+     * @param ids identificadores seleccionados, o una selección vacía
+     * @return redirección al listado
+     */
+    public String eliminarMultiples(List<Integer> ids) {
+        servicio.eliminarMultiples(ids);
         return "redirect:/mascotas";
+    }
+
+    private void agregarMensajeExito(Model modelo, String mensaje) {
+        if (modelo instanceof RedirectAttributes redirectAttributes) {
+            redirectAttributes.addFlashAttribute("mensajeExito", mensaje);
+        } else {
+            modelo.addAttribute("mensajeExito", mensaje);
+        }
     }
 }
