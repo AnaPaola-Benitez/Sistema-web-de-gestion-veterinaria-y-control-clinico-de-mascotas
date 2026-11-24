@@ -33,6 +33,7 @@
                             <th class="p-4 text-left">Imagen</th>
                             <th class="p-4 text-left">Nombre</th>
                             <th class="p-4 text-left">Edad</th>
+                            <th class="p-4 text-left">Propietario</th>
                             <th class="p-4 text-left">Acciones</th>
                         </tr>
                     </thead>
@@ -47,6 +48,7 @@
                             </td>
                             <td class="p-4" th:text="${mascota.nombre}">Nombre</td>
                             <td class="p-4" th:text="${mascota.edad}">Edad</td>
+                            <td class="p-4" th:text="${mascota.propietario == null ? 'Sin propietario asignado' : mascota.propietario.nombre + (mascota.propietario.apellido == null ? '' : ' ' + mascota.propietario.apellido)}">Propietario</td>
                             <td class="p-4">
                                 <a th:href="@{'/mascotas/editar/' + ${mascota.id}}" 
                                    class="text-blue-500 hover:text-blue-700">Editar</a>

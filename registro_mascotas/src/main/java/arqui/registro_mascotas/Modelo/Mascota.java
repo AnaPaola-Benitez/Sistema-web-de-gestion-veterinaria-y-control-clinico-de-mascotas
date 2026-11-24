@@ -16,6 +16,10 @@ public class Mascota
     @Column(length = 500)
     String urlImagen;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "propietario_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_mascotas_propietario"))
+    private Propietario propietario;
 
     public int getId() {
         return id;
@@ -40,5 +44,13 @@ public class Mascota
     }
     public void setUrlImagen(String urlImagen) {
         this.urlImagen = urlImagen;
+    }
+
+    public Propietario getPropietario() {
+        return propietario;
+    }
+
+    public void setPropietario(Propietario propietario) {
+        this.propietario = propietario;
     }
 }

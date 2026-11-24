@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import arqui.registro_mascotas.Modelo.Mascota;
 import arqui.registro_mascotas.Servicio.ServicioMascota;
+import arqui.registro_mascotas.Servicio.ServicioPropietario;
 
 /*
  * El controlador es la clase que se encarga de asignar peticiones http a los diferentes urls
@@ -23,9 +24,11 @@ import arqui.registro_mascotas.Servicio.ServicioMascota;
 @RequestMapping("/mascotas")
 public class ControladorMascotas {
     private final ServicioMascota servicio;
+    private final ServicioPropietario servicioPropietario;
 
-    public ControladorMascotas(ServicioMascota servicio) {
+    public ControladorMascotas(ServicioMascota servicio, ServicioPropietario servicioPropietario) {
         this.servicio = servicio;
+        this.servicioPropietario = servicioPropietario;
     }
 
     // Mostrar lista de mascotas
@@ -42,6 +45,7 @@ public class ControladorMascotas {
     public String mostrarFormularioDeNuevaMascota(Model modelo)
     {
         modelo.addAttribute("mascota", new Mascota());
+        modelo.addAttribute("propietarios", servicioPropietario.listar());
         return "mascotas/nueva_mascota";
     }
 
@@ -58,19 +62,14 @@ public class ControladorMascotas {
     public String mostrarFormularioDeEditarMascota(@PathVariable("id") int id, Model modelo) {
         var mascota = servicio.buscar(id);
         modelo.addAttribute("mascota", mascota);
+        modelo.addAttribute("propietarios", servicioPropietario.listar());
         return "mascotas/editar_mascota";
     }
 
     // Actualizar una mascota existente
     @PostMapping("/actualizar/{id}")
-    public String actualizarMascota(@PathVariable("id") int id, @RequestParam("nombre") String nombre,
-            @RequestParam("edad") int edad, @RequestParam(value = "urlImagen", required = false) String urlImagen)
+    public String actualizarMascota(@PathVariable("id") int id, @ModelAttribute("mascota") Mascota mascota)
     {
-        Mascota mascota = new Mascota();
-        mascota.setNombre(nombre);
-        mascota.setEdad(edad);
-        mascota.setUrlImagen(urlImagen);
-
         servicio.actualizar(id, mascota);
 
         return "redirect:/mascotas";

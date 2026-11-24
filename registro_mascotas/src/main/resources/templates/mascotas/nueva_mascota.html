@@ -24,6 +24,19 @@
                     <input type="number" id="edad" name="edad" min="0" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
                 </div>
 
+                <div>
+                    <label for="propietarioId" class="block text-lg font-medium text-gray-700">Propietario</label>
+                    <select id="propietarioId" name="propietario.id" required
+                            class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        <option value="">Selecciona un propietario</option>
+                        <option th:each="propietario : ${propietarios}" th:value="${propietario.id}"
+                                th:text="${propietario.nombre + (propietario.apellido == null ? '' : ' ' + propietario.apellido)}">Propietario</option>
+                    </select>
+                    <p th:if="${#lists.isEmpty(propietarios)}" class="mt-2 text-red-600">
+                        No hay propietarios registrados. Se necesita uno antes de guardar una mascota.
+                    </p>
+                </div>
+
                 <!-- Campo para la URL de la imagen -->
                 <div>
                     <label for="urlImagen" class="block text-lg font-medium text-gray-700">URL de Imagen (opcional)</label>
@@ -32,7 +45,8 @@
 
                 <!-- Botón para enviar el formulario -->
                 <div class="text-center">
-                    <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                    <button type="submit" th:disabled="${#lists.isEmpty(propietarios)}"
+                            class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50">
                         Guardar Mascota
                     </button>
                 </div>

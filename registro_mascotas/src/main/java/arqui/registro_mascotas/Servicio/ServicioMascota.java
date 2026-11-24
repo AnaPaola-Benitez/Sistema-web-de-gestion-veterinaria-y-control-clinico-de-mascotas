@@ -8,25 +8,30 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import arqui.registro_mascotas.BD.RepositorioMascotas;
+import arqui.registro_mascotas.BD.RepositorioPropietario;
 import arqui.registro_mascotas.Modelo.Mascota;
+import arqui.registro_mascotas.Modelo.Propietario;
 
 /**
  * Gestiona las operaciones y validaciones de mascotas de los RF-01 a RF-06.
- * Implementa las operaciones del UML sobre el modelo actual; las reglas de
- * propietarios y registros clínicos se integrarán al implementar esos módulos.
+ * Exige un propietario registrado al crear o actualizar una mascota.
+ * Las reglas de registros clínicos se integrarán al implementar esos módulos.
  */
 @Service
 public class ServicioMascota {
 
     private final RepositorioMascotas repositorio;
+    private final RepositorioPropietario repositorioPropietario;
 
     /**
      * Crea el servicio con su dependencia de persistencia.
      *
      * @param repositorio repositorio de mascotas
+     * @param repositorioPropietario repositorio de propietarios existentes
      */
-    public ServicioMascota(RepositorioMascotas repositorio) {
+    public ServicioMascota(RepositorioMascotas repositorio, RepositorioPropietario repositorioPropietario) {
         this.repositorio = repositorio;
+        this.repositorioPropietario = repositorioPropietario;
     }
 
     /**
@@ -34,14 +39,16 @@ public class ServicioMascota {
      *
      * @param mascota datos de la nueva mascota
      * @return mascota almacenada con su identificador
-     * @throws IllegalArgumentException si los datos son inválidos o ya tienen ID
+     * @throws IllegalArgumentException si los datos son inválidos, ya tienen ID
+     *         o el propietario no está registrado
      */
     @Transactional
     public Mascota registrar(Mascota mascota) {
-        validar(mascota);
+        Propietario propietario = validarYObtenerPropietario(mascota);
         if (mascota.getId() != 0) {
             throw new IllegalArgumentException("Una mascota nueva no debe tener identificador.");
         }
+        mascota.setPropietario(propietario);
         return repositorio.save(mascota);
     }
 
@@ -73,17 +80,19 @@ public class ServicioMascota {
      * El identificador de los datos recibidos no modifica el registro elegido.
      *
      * @param id identificador del registro que se actualizará
-     * @param datos nuevos valores de nombre, edad y fotografía
+     * @param datos nuevos valores de nombre, edad, fotografía y propietario
      * @return mascota actualizada
-     * @throws IllegalArgumentException si los datos son inválidos o no existe el ID
+     * @throws IllegalArgumentException si los datos son inválidos, no existe el ID
+     *         o el propietario no está registrado
      */
     @Transactional
     public Mascota actualizar(int id, Mascota datos) {
-        validar(datos);
+        Propietario propietario = validarYObtenerPropietario(datos);
         Mascota mascota = buscar(id);
         mascota.setNombre(datos.getNombre());
         mascota.setEdad(datos.getEdad());
         mascota.setUrlImagen(datos.getUrlImagen());
+        mascota.setPropietario(propietario);
         return repositorio.save(mascota);
     }
 
@@ -121,14 +130,29 @@ public class ServicioMascota {
     }
 
     /**
-     * Valida los campos actuales de una mascota sin acceder a la BD (RF-06).
+     * Valida los campos y la existencia del propietario (RF-01, RF-03 y RF-06).
      * El nombre es obligatorio, la edad admite cero y la fotografía es opcional.
      * Si se indica una fotografía, debe ser una URL HTTP o HTTPS con servidor.
      *
      * @param mascota datos que se validarán
-     * @throws IllegalArgumentException si se incumple alguna regla
+     * @throws IllegalArgumentException si se incumple alguna regla o el propietario
+     *         no está registrado
      */
+    @Transactional(readOnly = true)
     public void validar(Mascota mascota) {
+        validarYObtenerPropietario(mascota);
+    }
+
+    private Propietario validarYObtenerPropietario(Mascota mascota) {
+        validarDatos(mascota);
+        if (mascota.getPropietario() == null || mascota.getPropietario().getId() <= 0) {
+            throw new IllegalArgumentException("Debe seleccionar un propietario registrado para la mascota.");
+        }
+        return repositorioPropietario.findById(mascota.getPropietario().getId())
+                .orElseThrow(() -> new IllegalArgumentException("El propietario seleccionado no está registrado."));
+    }
+
+    private void validarDatos(Mascota mascota) {
         if (mascota == null) {
             throw new IllegalArgumentException("Los datos de la mascota son obligatorios.");
         }
