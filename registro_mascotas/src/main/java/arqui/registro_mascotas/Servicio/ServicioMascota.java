@@ -90,15 +90,23 @@ public class ServicioMascota {
     public Mascota actualizar(int id, Mascota datos) {
         Propietario propietario = validarYObtenerPropietario(datos);
         Mascota mascota = buscar(id);
-        mascota.setNombre(datos.getNombre());
-        mascota.setEdad(datos.getEdad());
-        mascota.setUrlImagen(datos.getUrlImagen());
-        mascota.setPropietario(propietario);
-        mascota.setEspecie(datos.getEspecie());
-        mascota.setRaza(datos.getRaza());
-        mascota.setSexo(datos.getSexo());
-        mascota.setPeso(datos.getPeso());
-        return repositorio.save(mascota);
+
+     actualizarDatosMascota(mascota, datos, propietario);
+
+     return repositorio.save(mascota);
+    }
+
+    // Actualiza los atributos de la mascota sin cambiar su ID.
+    private void actualizarDatosMascota(Mascota mascota, Mascota datos,
+       Propietario propietario) {
+    mascota.setNombre(datos.getNombre());
+    mascota.setEdad(datos.getEdad());
+    mascota.setUrlImagen(datos.getUrlImagen());
+    mascota.setPropietario(propietario);
+    mascota.setEspecie(datos.getEspecie());
+    mascota.setRaza(datos.getRaza());
+    mascota.setSexo(datos.getSexo());
+    mascota.setPeso(datos.getPeso());
     }
 
     /**
@@ -174,18 +182,23 @@ public class ServicioMascota {
 
     private void validarDatos(Mascota mascota) {
         if (mascota == null) {
-            throw new IllegalArgumentException("Los datos de la mascota son obligatorios.");
-        }
-        if (mascota.getNombre() == null || mascota.getNombre().isBlank()) {
-            throw new IllegalArgumentException("El nombre de la mascota no puede estar vacío.");
-        }
-        if (mascota.getEdad() < 0) {
-            throw new IllegalArgumentException("La edad de la mascota no puede ser negativa.");
-        }
-        if (!Double.isFinite(mascota.getPeso()) || mascota.getPeso() < 0) {
-            throw new IllegalArgumentException("El peso de la mascota debe ser un número finito mayor o igual a cero.");
-        }
-        String urlImagen = mascota.getUrlImagen();
+        throw new IllegalArgumentException("Los datos de la mascota son obligatorios.");
+    }
+    if (mascota.getNombre() == null || mascota.getNombre().isBlank()) {
+        throw new IllegalArgumentException("El nombre de la mascota no puede estar vacío.");
+    }
+    if (mascota.getEdad() < 0) {
+        throw new IllegalArgumentException("La edad de la mascota no puede ser negativa.");
+    }
+    if (!Double.isFinite(mascota.getPeso()) || mascota.getPeso() < 0) {
+        throw new IllegalArgumentException("El peso de la mascota debe ser un número finito mayor o igual a cero.");
+    }
+
+    validarUrlImagen(mascota.getUrlImagen());
+}
+
+    // Valida la URL de la fotografía.
+    private void validarUrlImagen(String urlImagen) {
         if (urlImagen == null || urlImagen.isBlank()) {
             return;
         }
@@ -193,7 +206,7 @@ public class ServicioMascota {
             URI uri = new URI(urlImagen);
             if (("http".equalsIgnoreCase(uri.getScheme())
                     || "https".equalsIgnoreCase(uri.getScheme())) && uri.getHost() != null) {
-                return;
+               return;
             }
         } catch (URISyntaxException ex) {
             throw new IllegalArgumentException("La URL de la fotografía debe ser una dirección HTTP o HTTPS válida.", ex);
