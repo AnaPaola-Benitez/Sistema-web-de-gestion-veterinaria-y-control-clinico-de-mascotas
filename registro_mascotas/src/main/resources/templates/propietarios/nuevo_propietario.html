@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Propietario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main class="max-w-2xl mx-auto px-4 py-8">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
+        <div class="flex justify-between items-center border-b pb-4">
+            <h1 class="text-xl font-bold text-slate-900">Registrar Nuevo Propietario</h1>
+            <a th:href="@{/propietarios}" class="text-sm text-slate-500 hover:text-slate-700">← Volver</a>
+        </div>
+
+        <div th:if="${error}" class="bg-rose-50 border border-rose-300 text-rose-800 px-4 py-3 rounded-lg text-sm"
+             th:text="${error}"></div>
+
+        <form th:action="@{/propietarios/registrar}" th:object="${propietario}" method="post" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nombre *</label>
+                    <input type="text" th:field="*{nombre}" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Apellido *</label>
+                    <input type="text" th:field="*{apellido}" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Teléfono *</label>
+                    <input type="text" th:field="*{telefono}" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Correo Electrónico *</label>
+                    <input type="email" th:field="*{correo}" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Dirección</label>
+                <input type="text" th:field="*{direccion}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+            </div>
+
+            <div class="pt-4 flex justify-end gap-3">
+                <a th:href="@{/propietarios}" class="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50">Cancelar</a>
+                <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-medium px-5 py-2 rounded-lg text-sm">
+                    Guardar Propietario
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+</body>
+</html>
