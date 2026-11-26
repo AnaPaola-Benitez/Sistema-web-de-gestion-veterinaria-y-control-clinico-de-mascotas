@@ -7,28 +7,26 @@
         <title>Lista de Mascotas</title>
     </head>
     <body class="bg-gray-100">
-        <div class="container mx-auto my-8">
+        <div th:replace="~{fragments/navbar :: navbar}"></div>
+        <div class="container mx-auto my-8 px-4">
             <p th:if="${mensajeExito}" th:text="${mensajeExito}" role="status"
                class="mb-4 p-4 bg-green-100 text-green-800 rounded-md"></p>
             <p th:if="${mensajeAviso}" th:text="${mensajeAviso}" role="status"
                class="mb-4 p-4 bg-yellow-100 text-yellow-800 rounded-md"></p>
-            <!-- Formulario para poder eliminar múltiples mascotas al mismo tiempo -->
             <form th:action="@{/mascotas/eliminar-multiples}" method="post" 
             onsubmit="return confirm('¿Estás seguro de eliminar las mascotas seleccionadas?');">
-                <!-- Título y botones -->
-                <div class="flex mb-8 w-auto">
-                    <h1 class="text-6xl font-bold self-center pl-8">CRUD de Mascotas</h1>
+                <div class="flex flex-wrap items-center gap-4 mb-8">
+                    <h1 class="text-4xl font-bold">Gestión de Mascotas</h1>
                     
-                    <button type="button" onclick="location.href = '/mascotas/nuevo'" class="ml-auto mr-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                    <button type="button" onclick="location.href = '/mascotas/nuevo'" class="ml-auto bg-teal-600 text-white py-2 px-4 rounded hover:bg-teal-700">
                         Agregar Nueva Mascota
                     </button>
                     
-                    <button type="submit" class="mr-8 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+                    <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
                         Eliminar Seleccionadas
                     </button>
                 </div>
                 
-                <!-- Tabla con la información de la base de datos -->
                 <div class="overflow-x-auto">
                 <table class="table-auto w-full bg-white rounded-lg shadow-md overflow-hidden">
                     <thead>
@@ -53,21 +51,25 @@
                             </td>
                             <td class="p-4" th:text="${mascota.id}">ID</td>
                             <td class="p-4">
-                                <img th:src="${mascota.urlImagen}" alt="Imagen de la mascota" class="w-16 h-16 object-cover rounded-md">
+                                <img th:if="${!#strings.isEmpty(mascota.urlImagen)}" th:src="${mascota.urlImagen}" alt="Imagen de la mascota" class="w-16 h-16 object-cover rounded-md">
+                                <span th:if="${#strings.isEmpty(mascota.urlImagen)}" class="text-xs text-gray-400">Sin foto</span>
                             </td>
-                            <td class="p-4" th:text="${mascota.nombre}">Nombre</td>
+                            <td class="p-4 font-medium" th:text="${mascota.nombre}">Nombre</td>
                             <td class="p-4" th:text="${mascota.edad}">Edad</td>
                             <td class="p-4" th:text="${#strings.isEmpty(mascota.especie) ? 'Sin registrar' : mascota.especie}">Especie</td>
                             <td class="p-4" th:text="${#strings.isEmpty(mascota.raza) ? 'Sin registrar' : mascota.raza}">Raza</td>
                             <td class="p-4" th:text="${#strings.isEmpty(mascota.sexo) ? 'Sin registrar' : mascota.sexo}">Sexo</td>
                             <td class="p-4" th:text="${mascota.peso == 0 ? 'Sin registrar' : mascota.peso}">Peso</td>
                             <td class="p-4" th:text="${mascota.propietario == null ? 'Sin propietario asignado' : mascota.propietario.nombre + (mascota.propietario.apellido == null ? '' : ' ' + mascota.propietario.apellido)}">Propietario</td>
-                            <td class="p-4">
+                            <td class="p-4 space-y-1 text-sm whitespace-nowrap">
+                                <a th:href="@{'/historial/mascota/' + ${mascota.id}}"
+                                   class="block text-teal-700 hover:underline font-medium">Historial Médico</a>
+                                <a th:href="@{'/vacunacion/mascota/' + ${mascota.id}}"
+                                   class="block text-indigo-700 hover:underline font-medium">Vacunación</a>
                                 <a th:href="@{'/mascotas/editar/' + ${mascota.id}}" 
-                                   class="text-blue-500 hover:text-blue-700">Editar</a>
-                                <br>
+                                   class="block text-blue-500 hover:text-blue-700">Editar</a>
                                 <a th:href="@{'/mascotas/eliminar/' + ${mascota.id}}" 
-                                   class="text-red-500 hover:text-red-700">Eliminar</a>
+                                   class="block text-red-500 hover:text-red-700">Eliminar</a>
                             </td>
                         </tr>
                     </tbody>
