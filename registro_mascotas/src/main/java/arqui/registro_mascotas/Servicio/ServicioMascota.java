@@ -182,18 +182,23 @@ public class ServicioMascota {
 
     private void validarDatos(Mascota mascota) {
         if (mascota == null) {
-            throw new IllegalArgumentException("Los datos de la mascota son obligatorios.");
-        }
-        if (mascota.getNombre() == null || mascota.getNombre().isBlank()) {
-            throw new IllegalArgumentException("El nombre de la mascota no puede estar vacío.");
-        }
-        if (mascota.getEdad() < 0) {
-            throw new IllegalArgumentException("La edad de la mascota no puede ser negativa.");
-        }
-        if (!Double.isFinite(mascota.getPeso()) || mascota.getPeso() < 0) {
-            throw new IllegalArgumentException("El peso de la mascota debe ser un número finito mayor o igual a cero.");
-        }
-        String urlImagen = mascota.getUrlImagen();
+        throw new IllegalArgumentException("Los datos de la mascota son obligatorios.");
+    }
+    if (mascota.getNombre() == null || mascota.getNombre().isBlank()) {
+        throw new IllegalArgumentException("El nombre de la mascota no puede estar vacío.");
+    }
+    if (mascota.getEdad() < 0) {
+        throw new IllegalArgumentException("La edad de la mascota no puede ser negativa.");
+    }
+    if (!Double.isFinite(mascota.getPeso()) || mascota.getPeso() < 0) {
+        throw new IllegalArgumentException("El peso de la mascota debe ser un número finito mayor o igual a cero.");
+    }
+
+    validarUrlImagen(mascota.getUrlImagen());
+}
+
+    // Valida la URL de la fotografía.
+    private void validarUrlImagen(String urlImagen) {
         if (urlImagen == null || urlImagen.isBlank()) {
             return;
         }
@@ -201,7 +206,7 @@ public class ServicioMascota {
             URI uri = new URI(urlImagen);
             if (("http".equalsIgnoreCase(uri.getScheme())
                     || "https".equalsIgnoreCase(uri.getScheme())) && uri.getHost() != null) {
-                return;
+               return;
             }
         } catch (URISyntaxException ex) {
             throw new IllegalArgumentException("La URL de la fotografía debe ser una dirección HTTP o HTTPS válida.", ex);
