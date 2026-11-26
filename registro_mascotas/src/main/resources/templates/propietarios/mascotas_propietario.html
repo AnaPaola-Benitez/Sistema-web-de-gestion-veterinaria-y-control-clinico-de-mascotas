@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mascotas del Propietario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main class="max-w-5xl mx-auto px-4 py-8 space-y-6">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-4">
+        <div>
+            <span class="text-xs uppercase font-semibold text-teal-700">Expediente de Propietario</span>
+            <h1 class="text-2xl font-bold text-slate-900"
+                th:text="${propietario.nombre + (propietario.apellido == null ? '' : ' ' + propietario.apellido)}"></h1>
+            <p class="text-sm text-slate-600 mt-1">
+                Tel: <span th:text="${propietario.telefono ?: '-'}"></span> ·
+                Correo: <span th:text="${propietario.correo ?: '-'}"></span>
+            </p>
+        </div>
+        <div class="flex gap-3">
+            <a th:href="@{/propietarios}" class="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50">
+                ← Propietarios
+            </a>
+            <a th:href="@{/mascotas/nuevo}" class="bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
+                + Registrar Mascota
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+        <p th:if="${#lists.isEmpty(mascotas)}" class="p-6 text-sm text-slate-500">Este propietario no tiene mascotas registradas.</p>
+        <table th:if="${!#lists.isEmpty(mascotas)}" class="w-full text-sm text-left">
+            <thead class="bg-slate-100 text-xs uppercase text-slate-600 border-b">
+            <tr>
+                <th class="px-4 py-3">Nombre</th>
+                <th class="px-4 py-3">Especie</th>
+                <th class="px-4 py-3">Raza</th>
+                <th class="px-4 py-3">Edad</th>
+                <th class="px-4 py-3">Peso</th>
+                <th class="px-4 py-3 text-right">Seguimiento</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y">
+            <tr th:each="m : ${mascotas}" class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-medium text-slate-900" th:text="${m.nombre}"></td>
+                <td class="px-4 py-3" th:text="${#strings.isEmpty(m.especie) ? 'Sin registrar' : m.especie}"></td>
+                <td class="px-4 py-3" th:text="${#strings.isEmpty(m.raza) ? 'Sin registrar' : m.raza}"></td>
+                <td class="px-4 py-3" th:text="${m.edad + ' años'}"></td>
+                <td class="px-4 py-3" th:text="${m.peso == 0 ? 'Sin registrar' : m.peso + ' kg'}"></td>
+                <td class="px-4 py-3 text-right space-x-3">
+                    <a th:href="@{/historial/mascota/{id}(id=${m.id})}" class="text-teal-700 hover:underline font-medium">Historial</a>
+                    <a th:href="@{/vacunacion/mascota/{id}(id=${m.id})}" class="text-indigo-700 hover:underline font-medium">Vacunas</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="navbar" class="bg-teal-700 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+        <a th:href="@{/panel}" class="font-bold text-lg tracking-wide">Clínica Veterinaria</a>
+        <div class="flex flex-wrap gap-5 text-sm font-medium">
+            <a th:href="@{/panel}" class="hover:text-teal-200 transition">Panel Principal</a>
+            <a th:href="@{/mascotas}" class="hover:text-teal-200 transition">Mascotas</a>
+            <a th:href="@{/propietarios}" class="hover:text-teal-200 transition">Propietarios</a>
+            <a th:href="@{/citas}" class="hover:text-teal-200 transition">Citas</a>
+            <a th:href="@{/vacunacion/pendientes}" class="hover:text-teal-200 transition">Vacunación</a>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

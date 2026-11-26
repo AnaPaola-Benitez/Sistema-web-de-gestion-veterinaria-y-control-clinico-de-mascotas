@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Administración de Propietarios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main class="max-w-7xl mx-auto px-4 py-8 space-y-6">
+    <div class="flex flex-wrap justify-between items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Propietarios Registrados</h1>
+            <p class="text-sm text-slate-500">Consulta propietarios activos y sus mascotas vinculadas.</p>
+        </div>
+        <a th:href="@{/propietarios/nuevo}"
+           class="bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
+            + Nuevo Propietario
+        </a>
+    </div>
+
+    <div th:if="${param.exito}" class="bg-emerald-50 border border-emerald-300 text-emerald-800 px-4 py-3 rounded-lg text-sm"
+         th:text="${param.exito}"></div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+        <p th:if="${#lists.isEmpty(propietarios)}" class="p-6 text-sm text-slate-500">No hay propietarios activos registrados.</p>
+        <table th:if="${!#lists.isEmpty(propietarios)}" class="w-full text-sm text-left">
+            <thead class="bg-slate-100 text-xs uppercase text-slate-600 border-b">
+            <tr>
+                <th class="px-4 py-3">Nombre Completo</th>
+                <th class="px-4 py-3">Teléfono</th>
+                <th class="px-4 py-3">Correo</th>
+                <th class="px-4 py-3">Dirección</th>
+                <th class="px-4 py-3 text-right">Acciones</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y">
+            <tr th:each="p : ${propietarios}" class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-medium text-slate-900"
+                    th:text="${p.nombre + (p.apellido == null ? '' : ' ' + p.apellido)}"></td>
+                <td class="px-4 py-3" th:text="${p.telefono ?: '-'}"></td>
+                <td class="px-4 py-3" th:text="${p.correo ?: '-'}"></td>
+                <td class="px-4 py-3 text-slate-600" th:text="${p.direccion ?: '-'}"></td>
+                <td class="px-4 py-3 text-right space-x-3 whitespace-nowrap">
+                    <a th:href="@{/propietarios/{id}/mascotas(id=${p.id})}" class="text-teal-700 hover:underline font-medium">Mascotas</a>
+                    <a th:href="@{/propietarios/editar/{id}(id=${p.id})}" class="text-amber-700 hover:underline font-medium">Editar</a>
+                    <form th:action="@{/propietarios/baja/{id}(id=${p.id})}" method="post" class="inline"
+                          onsubmit="return confirm('¿Dar de baja a este propietario?');">
+                        <button type="submit" class="text-rose-600 hover:underline font-medium">Dar de baja</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

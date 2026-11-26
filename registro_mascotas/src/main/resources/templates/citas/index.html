@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Citas Veterinarias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main class="max-w-7xl mx-auto px-4 py-8 space-y-6">
+    <div class="flex flex-wrap justify-between items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Agenda de Citas Veterinarias</h1>
+            <p class="text-sm text-slate-500">Programa, modifica o cancela citas clínicas sin empalmes de horario.</p>
+        </div>
+        <div class="flex gap-3">
+            <a th:href="@{/citas}" class="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white hover:bg-slate-50">Todas</a>
+            <a th:href="@{/citas/proximas}" class="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white hover:bg-slate-50">Próximas</a>
+            <a th:href="@{/citas/nueva}" class="bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
+                + Programar Cita
+            </a>
+        </div>
+    </div>
+
+    <div th:if="${param.exito}" class="bg-emerald-50 border border-emerald-300 text-emerald-800 px-4 py-3 rounded-lg text-sm"
+         th:text="${param.exito}"></div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+        <p th:if="${#lists.isEmpty(citas)}" class="p-6 text-sm text-slate-500">No hay citas registradas para mostrar.</p>
+        <table th:if="${!#lists.isEmpty(citas)}" class="w-full text-sm text-left">
+            <thead class="bg-slate-100 text-xs uppercase text-slate-600 border-b">
+            <tr>
+                <th class="px-4 py-3">Fecha</th>
+                <th class="px-4 py-3">Hora</th>
+                <th class="px-4 py-3">Mascota</th>
+                <th class="px-4 py-3">Propietario</th>
+                <th class="px-4 py-3">Motivo</th>
+                <th class="px-4 py-3">Estado</th>
+                <th class="px-4 py-3 text-right">Acciones</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y">
+            <tr th:each="c : ${citas}" class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-medium" th:text="${c.fecha}"></td>
+                <td class="px-4 py-3" th:text="${c.hora}"></td>
+                <td class="px-4 py-3 font-medium text-slate-900" th:text="${c.mascota.nombre}"></td>
+                <td class="px-4 py-3 text-slate-600"
+                    th:text="${c.mascota.propietario != null ? c.mascota.propietario.nombre + (c.mascota.propietario.apellido == null ? '' : ' ' + c.mascota.propietario.apellido) : '-'}"></td>
+                <td class="px-4 py-3" th:text="${c.motivo}"></td>
+                <td class="px-4 py-3">
+                    <span th:if="${c.estado.name() == 'PROGRAMADA'}"
+                          class="px-2 py-1 text-xs font-semibold rounded-full bg-sky-100 text-sky-800">PROGRAMADA</span>
+                    <span th:if="${c.estado.name() == 'ATENDIDA'}"
+                          class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">ATENDIDA</span>
+                    <span th:if="${c.estado.name() == 'CANCELADA'}"
+                          class="px-2 py-1 text-xs font-semibold rounded-full bg-rose-100 text-rose-800">CANCELADA</span>
+                </td>
+                <td class="px-4 py-3 text-right space-x-3 whitespace-nowrap">
+                    <a th:href="@{/citas/editar/{id}(id=${c.id})}" class="text-amber-700 hover:underline font-medium">Editar</a>
+                    <form th:if="${c.estado.name() != 'CANCELADA'}" th:action="@{/citas/cancelar/{id}(id=${c.id})}"
+                          method="post" class="inline" onsubmit="return confirm('¿Cancelar esta cita?');">
+                        <button type="submit" class="text-rose-600 hover:underline font-medium">Cancelar</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

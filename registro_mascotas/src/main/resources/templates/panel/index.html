@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Principal - Control Veterinario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <h2 class="text-lg font-semibold mb-4">Búsqueda y Filtrado Rápido</h2>
+        <form th:action="@{/panel/buscar}" method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" name="texto" th:value="${texto}" placeholder="Nombre de mascota o propietario..."
+                   class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+            <select name="modulo" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                <option value="mascotas" th:selected="${modulo == 'mascotas'}">Mascotas</option>
+                <option value="propietarios" th:selected="${modulo == 'propietarios'}">Propietarios</option>
+                <option value="citas" th:selected="${modulo == 'citas'}">Citas</option>
+            </select>
+            <select name="estado" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                <option value="">Todos los estados (Citas)</option>
+                <option th:each="est : ${estados}" th:value="${est}" th:text="${est}"
+                        th:selected="${estadoSeleccionado == est}"></option>
+            </select>
+            <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg px-4 py-2 text-sm">
+                Buscar
+            </button>
+        </form>
+
+        <div th:if="${resultadosMascotas != null}" class="mt-4">
+            <h3 class="font-medium text-sm text-slate-600 mb-2">Mascotas encontradas:</h3>
+            <p th:if="${#lists.isEmpty(resultadosMascotas)}" class="text-sm text-slate-500">Sin coincidencias.</p>
+            <ul class="divide-y text-sm" th:if="${!#lists.isEmpty(resultadosMascotas)}">
+                <li th:each="m : ${resultadosMascotas}" class="py-2 flex justify-between">
+                    <span>
+                        <strong th:text="${m.nombre}"></strong>
+                        (<span th:text="${#strings.isEmpty(m.especie) ? 'Sin especie' : m.especie}"></span>)
+                        — Propietario:
+                        <span th:text="${m.propietario != null ? m.propietario.nombre + (m.propietario.apellido == null ? '' : ' ' + m.propietario.apellido) : 'Sin asignar'}"></span>
+                    </span>
+                    <div class="space-x-3">
+                        <a th:href="@{/historial/mascota/{id}(id=${m.id})}" class="text-teal-700 hover:underline">Historial</a>
+                        <a th:href="@{/vacunacion/mascota/{id}(id=${m.id})}" class="text-indigo-700 hover:underline">Vacunas</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div th:if="${resultadosPropietarios != null}" class="mt-4">
+            <h3 class="font-medium text-sm text-slate-600 mb-2">Propietarios encontrados:</h3>
+            <p th:if="${#lists.isEmpty(resultadosPropietarios)}" class="text-sm text-slate-500">Sin coincidencias.</p>
+            <ul class="divide-y text-sm" th:if="${!#lists.isEmpty(resultadosPropietarios)}">
+                <li th:each="p : ${resultadosPropietarios}" class="py-2 flex justify-between">
+                    <span th:text="${p.nombre + (p.apellido == null ? '' : ' ' + p.apellido) + ' — Tel: ' + (p.telefono ?: '-')}"></span>
+                    <a th:href="@{/propietarios/{id}/mascotas(id=${p.id})}" class="text-teal-700 hover:underline">Ver mascotas</a>
+                </li>
+            </ul>
+        </div>
+
+        <div th:if="${resultadosCitas != null}" class="mt-4">
+            <h3 class="font-medium text-sm text-slate-600 mb-2">Citas filtradas:</h3>
+            <p th:if="${#lists.isEmpty(resultadosCitas)}" class="text-sm text-slate-500">Sin coincidencias.</p>
+            <ul class="divide-y text-sm" th:if="${!#lists.isEmpty(resultadosCitas)}">
+                <li th:each="c : ${resultadosCitas}" class="py-2">
+                    <span th:text="${c.fecha + ' ' + c.hora + ' — ' + c.mascota.nombre + ' (' + c.estado + ')'}"></span>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold">Próximas Citas</h2>
+                <a th:href="@{/citas/nueva}" class="text-sm text-teal-700 font-medium hover:underline">+ Programar</a>
+            </div>
+            <p th:if="${#lists.isEmpty(proximasCitas)}" class="text-sm text-slate-500">No hay citas próximas programadas.</p>
+            <table th:if="${!#lists.isEmpty(proximasCitas)}" class="w-full text-sm text-left">
+                <thead class="text-xs uppercase text-slate-500 border-b">
+                <tr>
+                    <th class="py-2">Fecha</th>
+                    <th class="py-2">Hora</th>
+                    <th class="py-2">Mascota</th>
+                    <th class="py-2">Estado</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y">
+                <tr th:each="cita : ${proximasCitas}">
+                    <td class="py-2" th:text="${cita.fecha}"></td>
+                    <td class="py-2" th:text="${cita.hora}"></td>
+                    <td class="py-2" th:text="${cita.mascota.nombre}"></td>
+                    <td class="py-2" th:text="${cita.estado}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold">Refuerzos de Vacunación Pendientes</h2>
+                <a th:href="@{/vacunacion/nueva}" class="text-sm text-teal-700 font-medium hover:underline">+ Registrar vacuna</a>
+            </div>
+            <p th:if="${#lists.isEmpty(vacunasPendientes)}" class="text-sm text-slate-500">No hay refuerzos pendientes a la fecha.</p>
+            <table th:if="${!#lists.isEmpty(vacunasPendientes)}" class="w-full text-sm text-left">
+                <thead class="text-xs uppercase text-slate-500 border-b">
+                <tr>
+                    <th class="py-2">Mascota</th>
+                    <th class="py-2">Vacuna</th>
+                    <th class="py-2">Dosis</th>
+                    <th class="py-2">Fecha Refuerzo</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y">
+                <tr th:each="vac : ${vacunasPendientes}">
+                    <td class="py-2" th:text="${vac.mascota.nombre}"></td>
+                    <td class="py-2" th:text="${vac.vacuna}"></td>
+                    <td class="py-2" th:text="${vac.numeroDosis}"></td>
+                    <td class="py-2 text-amber-700 font-medium" th:text="${vac.fechaRefuerzo}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+</main>
+</body>
+</html>
