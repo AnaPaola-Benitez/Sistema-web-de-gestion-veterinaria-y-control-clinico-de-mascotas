@@ -9,13 +9,13 @@ public class Mascota
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int id;
+    private int id;
 
-    String nombre;
-    int edad;
+    private String nombre;
+    private int edad;
 
     @Column(length = 500)
-    String urlImagen;
+    private String urlImagen;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "propietario_id", nullable = false,
