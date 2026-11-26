@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Control de Vacunación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main class="max-w-5xl mx-auto px-4 py-8 space-y-6">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-4">
+        <div>
+            <span class="text-xs uppercase font-semibold text-indigo-700">Cartilla de Vacunación</span>
+            <h1 class="text-2xl font-bold text-slate-900"
+                th:text="${mascota.nombre + (#strings.isEmpty(mascota.especie) ? '' : ' (' + mascota.especie + ')')}"></h1>
+            <p class="text-sm text-slate-600 mt-1"
+               th:text="'Propietario: ' + ${mascota.propietario != null ? mascota.propietario.nombre + (mascota.propietario.apellido == null ? '' : ' ' + mascota.propietario.apellido) : '-'}"></p>
+        </div>
+        <div class="flex gap-3">
+            <a th:href="@{/mascotas}" class="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50">
+                ← Mascotas
+            </a>
+            <a th:href="@{/vacunacion/nueva(mascotaId=${mascota.id})}"
+               class="bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
+                + Registrar Vacuna
+            </a>
+        </div>
+    </div>
+
+    <div th:if="${param.exito}" class="bg-emerald-50 border border-emerald-300 text-emerald-800 px-4 py-3 rounded-lg text-sm"
+         th:text="${param.exito}"></div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+        <p th:if="${#lists.isEmpty(vacunas)}" class="p-6 text-sm text-slate-500">No hay vacunas registradas para esta mascota.</p>
+        <table th:if="${!#lists.isEmpty(vacunas)}" class="w-full text-sm text-left">
+            <thead class="bg-slate-100 text-xs uppercase text-slate-600 border-b">
+            <tr>
+                <th class="px-4 py-3">Vacuna</th>
+                <th class="px-4 py-3">Dosis #</th>
+                <th class="px-4 py-3">Fecha Aplicación</th>
+                <th class="px-4 py-3">Próximo Refuerzo</th>
+                <th class="px-4 py-3">Estado Refuerzo</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y">
+            <tr th:each="v : ${vacunas}" class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-medium text-slate-900" th:text="${v.vacuna}"></td>
+                <td class="px-4 py-3" th:text="${v.numeroDosis}"></td>
+                <td class="px-4 py-3" th:text="${v.fechaAplicacion}"></td>
+                <td class="px-4 py-3" th:text="${v.fechaRefuerzo != null ? v.fechaRefuerzo : 'No aplica'}"></td>
+                <td class="px-4 py-3">
+                    <span th:if="${v.tieneRefuerzoPendiente(hoy)}"
+                          class="px-2 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800">Refuerzo pendiente</span>
+                    <span th:if="${v.fechaRefuerzo != null and !v.tieneRefuerzoPendiente(hoy)}"
+                          class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">Programado</span>
+                    <span th:if="${v.fechaRefuerzo == null}"
+                          class="px-2 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">Completado</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>
