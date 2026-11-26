@@ -90,15 +90,23 @@ public class ServicioMascota {
     public Mascota actualizar(int id, Mascota datos) {
         Propietario propietario = validarYObtenerPropietario(datos);
         Mascota mascota = buscar(id);
-        mascota.setNombre(datos.getNombre());
-        mascota.setEdad(datos.getEdad());
-        mascota.setUrlImagen(datos.getUrlImagen());
-        mascota.setPropietario(propietario);
-        mascota.setEspecie(datos.getEspecie());
-        mascota.setRaza(datos.getRaza());
-        mascota.setSexo(datos.getSexo());
-        mascota.setPeso(datos.getPeso());
-        return repositorio.save(mascota);
+
+     actualizarDatosMascota(mascota, datos, propietario);
+
+     return repositorio.save(mascota);
+    }
+
+    // Actualiza los atributos de la mascota sin cambiar su ID.
+    private void actualizarDatosMascota(Mascota mascota, Mascota datos,
+       Propietario propietario) {
+    mascota.setNombre(datos.getNombre());
+    mascota.setEdad(datos.getEdad());
+    mascota.setUrlImagen(datos.getUrlImagen());
+    mascota.setPropietario(propietario);
+    mascota.setEspecie(datos.getEspecie());
+    mascota.setRaza(datos.getRaza());
+    mascota.setSexo(datos.getSexo());
+    mascota.setPeso(datos.getPeso());
     }
 
     /**
