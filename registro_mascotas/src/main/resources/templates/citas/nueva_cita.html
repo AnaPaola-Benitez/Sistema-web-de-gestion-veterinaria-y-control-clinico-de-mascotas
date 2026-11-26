@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Programar Cita</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main class="max-w-2xl mx-auto px-4 py-8">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
+        <div class="flex justify-between items-center border-b pb-4">
+            <h1 class="text-xl font-bold text-slate-900">Programar Cita Veterinaria</h1>
+            <a th:href="@{/citas}" class="text-sm text-slate-500 hover:text-slate-700">← Volver</a>
+        </div>
+
+        <div th:if="${error}" class="bg-rose-50 border border-rose-300 text-rose-800 px-4 py-3 rounded-lg text-sm"
+             th:text="${error}"></div>
+
+        <form th:action="@{/citas/programar}" th:object="${cita}" method="post" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Mascota *</label>
+                <select name="mascota.id" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    <option value="">-- Selecciona una mascota --</option>
+                    <option th:each="m : ${mascotas}" th:value="${m.id}"
+                            th:text="${m.nombre + (#strings.isEmpty(m.especie) ? '' : ' (' + m.especie + ')') + ' - Prop: ' + (m.propietario != null ? m.propietario.nombre : '')}"
+                            th:selected="${cita.mascota != null and cita.mascota.id == m.id}"></option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Fecha *</label>
+                    <input type="date" th:field="*{fecha}" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Hora *</label>
+                    <input type="time" th:field="*{hora}" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Motivo de Atención *</label>
+                <textarea th:field="*{motivo}" rows="3" required placeholder="Ej. Consulta general, revisión postoperatoria..."
+                          class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
+            </div>
+
+            <div class="pt-4 flex justify-end gap-3">
+                <a th:href="@{/citas}" class="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50">Cancelar</a>
+                <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-medium px-5 py-2 rounded-lg text-sm">
+                    Programar Cita
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+</body>
+</html>
